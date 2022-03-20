@@ -1,3 +1,5 @@
+from pprint import pprint
+
 from django.http import JsonResponse
 from django.templatetags.static import static
 
@@ -59,4 +61,5 @@ def product_list_api(request):
 
 def register_order(request):
     # TODO это лишь заглушка
+    print(request.body.decode('utf-8'))
     return JsonResponse({})
