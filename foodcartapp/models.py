@@ -136,7 +136,7 @@ class Order(models.Model):
         blank=True,
         db_index=True
     )
-    phone = PhoneNumberField(verbose_name='номер владельца')
+    phonenumber = PhoneNumberField(verbose_name='номер владельца')
     address = models.CharField(
         'адрес',
         max_length=1000,
