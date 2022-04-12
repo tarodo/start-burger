@@ -142,7 +142,7 @@ class Order(models.Model):
         max_length=1000,
         db_index=True
     )
-    items = models.ManyToManyField(Product, related_name='orders', through='OrderProduct')
+    products = models.ManyToManyField(Product, related_name='orders', through='OrderProduct')
 
     class Meta:
         verbose_name = 'заказ'
