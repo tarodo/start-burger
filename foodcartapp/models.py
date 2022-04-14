@@ -163,7 +163,7 @@ class OrderProduct(models.Model):
         on_delete=models.CASCADE,
         verbose_name='продукт'
     )
-    qty = models.IntegerField(verbose_name='количество')
+    quantity = models.IntegerField(verbose_name='количество')
 
     class Meta:
         verbose_name = 'продукт'
