@@ -1,12 +1,7 @@
-import json
-from pprint import pprint
-
-import phonenumbers
 from django.http import JsonResponse
 from django.templatetags.static import static
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from rest_framework import status
 from rest_framework.serializers import ModelSerializer, ListField
 
 from .models import Product, Order, OrderProduct
@@ -71,11 +66,11 @@ class ProductSerializer(ModelSerializer):
 
 
 class OrderSerializer(ModelSerializer):
-    products = ListField(child=ProductSerializer(), allow_empty=False)
+    products = ListField(child=ProductSerializer(), allow_empty=False, write_only=True)
 
     class Meta:
         model = Order
-        fields = ['firstname', 'lastname', 'phonenumber', 'address', 'products']
+        fields = ['id', 'firstname', 'lastname', 'phonenumber', 'address', 'products']
 
 
 @api_view(['POST'])
@@ -93,7 +88,8 @@ def register_order(request):
 
     products_fields = serializer.validated_data['products']
     products = [OrderProduct(order=new_order, **fields) for fields in products_fields]
-    pprint(products)
     OrderProduct.objects.bulk_create(products)
 
-    return Response({})
+    order = OrderSerializer(new_order)
+
+    return Response(order.data)
