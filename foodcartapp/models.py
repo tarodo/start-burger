@@ -152,6 +152,16 @@ class Order(models.Model):
     products = models.ManyToManyField(Product, related_name='orders', through='OrderProduct')
     objects = PriceQuerySet.as_manager()
 
+    status = models.SmallIntegerField(
+        choices=[
+            (1, 'Необработанный'),
+            (2, 'Подтверждённый'),
+        ],
+        db_index=True,
+        default=1,
+        verbose_name='статус'
+    )
+
     class Meta:
         verbose_name = 'заказ'
         verbose_name_plural = 'заказы'
