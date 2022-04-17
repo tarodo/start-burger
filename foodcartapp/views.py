@@ -3,6 +3,7 @@ from django.templatetags.static import static
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.serializers import ModelSerializer, ListField
+from django.db import transaction
 
 from .models import Product, Order, OrderProduct
 
@@ -74,6 +75,7 @@ class OrderSerializer(ModelSerializer):
 
 
 @api_view(['POST'])
+@transaction.atomic
 def register_order(request):
     serializer = OrderSerializer(data=request.data)
     serializer.is_valid(raise_exception=True)
@@ -85,7 +87,6 @@ def register_order(request):
         phonenumber=order_data["phonenumber"],
         address=order_data["address"]
     )
-
     products_fields = serializer.validated_data['products']
     products = [OrderProduct(order=new_order, price=fields['product'].price, **fields) for fields in products_fields]
     OrderProduct.objects.bulk_create(products)
