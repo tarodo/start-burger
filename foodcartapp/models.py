@@ -151,6 +151,16 @@ class Order(models.Model):
         db_index=True
     )
     products = models.ManyToManyField(Product, related_name='orders', through='OrderProduct')
+    payment_method = models.SmallIntegerField(
+        choices=[
+            (1, 'Наличностью'),
+            (2, 'Электронно'),
+        ],
+        db_index=True,
+        default=2,
+        verbose_name='метод оплаты'
+    )
+
     objects = PriceQuerySet.as_manager()
 
     comment = models.TextField(
