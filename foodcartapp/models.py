@@ -32,8 +32,8 @@ class ProductQuerySet(models.QuerySet):
     def available(self):
         products = (
             RestaurantMenuItem.objects
-            .filter(availability=True)
-            .values_list('product')
+                .filter(availability=True)
+                .values_list('product')
         )
         return self.filter(pk__in=products)
 
@@ -151,6 +151,11 @@ class Order(models.Model):
     )
     products = models.ManyToManyField(Product, related_name='orders', through='OrderProduct')
     objects = PriceQuerySet.as_manager()
+
+    comment = models.TextField(
+        'комментарий',
+        blank=True,
+    )
 
     status = models.SmallIntegerField(
         choices=[
