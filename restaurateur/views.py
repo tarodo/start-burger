@@ -1,4 +1,5 @@
 from django import forms
+from django.conf import settings
 from django.shortcuts import redirect, render
 from django.views import View
 from django.urls import reverse_lazy
@@ -6,6 +7,9 @@ from django.contrib.auth.decorators import user_passes_test
 
 from django.contrib.auth import authenticate, login
 from django.contrib.auth import views as auth_views
+
+import requests
+from geopy import distance
 
 
 from foodcartapp.models import Product, Restaurant, Order, RestaurantMenuItem
@@ -63,6 +67,24 @@ def is_manager(user):
     return user.is_staff  # FIXME replace with specific permission
 
 
+def fetch_coordinates(apikey, address):
+    base_url = "https://geocode-maps.yandex.ru/1.x"
+    response = requests.get(base_url, params={
+        "geocode": address,
+        "apikey": apikey,
+        "format": "json",
+    })
+    response.raise_for_status()
+    found_places = response.json()['response']['GeoObjectCollection']['featureMember']
+
+    if not found_places:
+        return None
+
+    most_relevant = found_places[0]
+    lon, lat = most_relevant['GeoObject']['Point']['pos'].split(" ")
+    return lon, lat
+
+
 @user_passes_test(is_manager, login_url='restaurateur:login')
 def view_products(request):
     restaurants = list(Restaurant.objects.order_by('name'))
@@ -105,6 +127,7 @@ def view_orders(request):
 
     for order in orders:
         order.restaurants = set()
+        order.restaurant_distances = []
 
         for order_item in order.products.all():
             product_restaurants = [
@@ -116,6 +139,22 @@ def view_orders(request):
                 order.restaurants = set(product_restaurants)
 
             order.restaurants &= set(product_restaurants)
+
+        geocode_token = settings.YANDEX_GEOCODER_KEY
+        customer_coords = fetch_coordinates(geocode_token, order.address)
+        if not customer_coords:
+            order.restaurant_distances.append(
+                ('-', 'адрес не распознан')
+            )
+            continue
+        for restaurant in order.restaurants:
+            rest_coords = fetch_coordinates(geocode_token, restaurant.address)
+            rest_distance = distance.distance(customer_coords, rest_coords).km
+            order.restaurant_distances.append(
+                (restaurant.name, round(rest_distance, 2))
+            )
+        order.restaurant_distances = sorted(order.restaurant_distances, key=lambda rest_dist: rest_dist[1])
+        print(order.restaurant_distances)
 
     return render(request, template_name='order_items.html', context={
         'order_items': orders,

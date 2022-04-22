@@ -39,8 +39,8 @@
           <details>
             <summary>Развернуть</summary>
             <ul>
-              {% for restaurant in item.restaurants %}
-                <li>{{ restaurant.name }}</li>
+              {% for restaurant_name, distance in item.restaurant_distances %}
+                <li>{{ restaurant_name }} - {{ distance }} км.</li>
               {% endfor %}
             </ul>
           </details>
