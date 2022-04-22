@@ -127,7 +127,6 @@ class RestaurantMenuItem(models.Model):
 
 
 class PriceQuerySet(models.QuerySet):
-    @property
     def price(self):
         return self.annotate(full_price=Sum(F('orderproduct__price') * F('orderproduct__quantity')))
 
@@ -160,14 +159,10 @@ class Order(models.Model):
         default=2,
         verbose_name='метод оплаты'
     )
-
-    objects = PriceQuerySet.as_manager()
-
     comment = models.TextField(
         'комментарий',
         blank=True,
     )
-
     status = models.SmallIntegerField(
         choices=[
             (1, 'Необработанный'),
@@ -177,10 +172,20 @@ class Order(models.Model):
         default=1,
         verbose_name='статус'
     )
-
     registered_at = models.DateTimeField(default=timezone.now, verbose_name="дата/время создания", db_index=True)
     called_at = models.DateTimeField(verbose_name="дата/время звонка", db_index=True, null=True, blank=True)
     delivered_at = models.DateTimeField(verbose_name="дата/время доставки", db_index=True, null=True, blank=True)
+
+    restaurant = models.ForeignKey(
+        Restaurant,
+        related_name='orders',
+        on_delete=models.SET_NULL,
+        verbose_name='ресторан',
+        null=True,
+        blank=True
+    )
+
+    objects = PriceQuerySet.as_manager()
 
     class Meta:
         verbose_name = 'заказ'
