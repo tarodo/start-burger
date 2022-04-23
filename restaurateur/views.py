@@ -11,7 +11,7 @@ from django.contrib.auth import views as auth_views
 import requests
 from geopy import distance
 
-
+from distance.models import Place
 from foodcartapp.models import Product, Restaurant, Order, RestaurantMenuItem
 
 
@@ -85,6 +85,25 @@ def fetch_coordinates(apikey, address):
     return lon, lat
 
 
+def get_place_coordinates(address):
+    geocoder_token = settings.YANDEX_GEOCODER_KEY
+    place, created = Place.objects.get_or_create(address=address)
+
+    if not created:
+        return place.lon, place.lat
+
+    place_coords = fetch_coordinates(geocoder_token, address)
+    if not place_coords:
+        place.delete()
+        return None
+
+    lon, lat = place_coords
+    place.lon = lon
+    place.lat = lat
+    place.save()
+    return place_coords
+
+
 @user_passes_test(is_manager, login_url='restaurateur:login')
 def view_products(request):
     restaurants = list(Restaurant.objects.order_by('name'))
@@ -140,21 +159,19 @@ def view_orders(request):
 
             order.restaurants &= set(product_restaurants)
 
-        geocode_token = settings.YANDEX_GEOCODER_KEY
-        customer_coords = fetch_coordinates(geocode_token, order.address)
+        customer_coords = get_place_coordinates(order.address)
         if not customer_coords:
             order.restaurant_distances.append(
                 ('-', 'адрес не распознан')
             )
             continue
         for restaurant in order.restaurants:
-            rest_coords = fetch_coordinates(geocode_token, restaurant.address)
+            rest_coords = get_place_coordinates(restaurant.address)
             rest_distance = distance.distance(customer_coords, rest_coords).km
             order.restaurant_distances.append(
                 (restaurant.name, round(rest_distance, 2))
             )
         order.restaurant_distances = sorted(order.restaurant_distances, key=lambda rest_dist: rest_dist[1])
-        print(order.restaurant_distances)
 
     return render(request, template_name='order_items.html', context={
         'order_items': orders,
