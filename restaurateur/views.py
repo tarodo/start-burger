@@ -15,27 +15,27 @@ from foodcartapp.models import Order, Product, Restaurant, RestaurantMenuItem
 
 class Login(forms.Form):
     username = forms.CharField(
-        label='Логин', max_length=75, required=True,
-        widget=forms.TextInput(attrs={
-            'class': 'form-control',
-            'placeholder': 'Укажите имя пользователя'
-        })
+        label='Логин',
+        max_length=75,
+        required=True,
+        widget=forms.TextInput(
+            attrs={'class': 'form-control', 'placeholder': 'Укажите имя пользователя'}
+        ),
     )
     password = forms.CharField(
-        label='Пароль', max_length=75, required=True,
-        widget=forms.PasswordInput(attrs={
-            'class': 'form-control',
-            'placeholder': 'Введите пароль'
-        })
+        label='Пароль',
+        max_length=75,
+        required=True,
+        widget=forms.PasswordInput(
+            attrs={'class': 'form-control', 'placeholder': 'Введите пароль'}
+        ),
     )
 
 
 class LoginView(View):
     def get(self, request, *args, **kwargs):
         form = Login()
-        return render(request, 'login.html', context={
-            'form': form
-        })
+        return render(request, 'login.html', context={'form': form})
 
     def post(self, request):
         form = Login(request.POST)
@@ -51,10 +51,14 @@ class LoginView(View):
                     return redirect('restaurateur:RestaurantView')
                 return redirect('start_page')
 
-        return render(request, 'login.html', context={
-            'form': form,
-            'ivalid': True,
-        })
+        return render(
+            request,
+            'login.html',
+            context={
+                'form': form,
+                'ivalid': True,
+            },
+        )
 
 
 class LogoutView(auth_views.LogoutView):
@@ -67,11 +71,14 @@ def is_manager(user):
 
 def fetch_coordinates(apikey, address):
     base_url = "https://geocode-maps.yandex.ru/1.x"
-    response = requests.get(base_url, params={
-        "geocode": address,
-        "apikey": apikey,
-        "format": "json",
-    })
+    response = requests.get(
+        base_url,
+        params={
+            "geocode": address,
+            "apikey": apikey,
+            "format": "json",
+        },
+    )
     response.raise_for_status()
     found_places = response.json()['response']['GeoObjectCollection']['featureMember']
 
@@ -113,34 +120,45 @@ def view_products(request):
 
         availability = {
             **default_availability,
-            **{item.restaurant_id: item.availability for item in product.menu_items.all()},
+            **{
+                item.restaurant_id: item.availability
+                for item in product.menu_items.all()
+            },
         }
-        orderer_availability = [availability[restaurant.id] for restaurant in restaurants]
+        orderer_availability = [
+            availability[restaurant.id] for restaurant in restaurants
+        ]
 
-        products_with_restaurants.append(
-            (product, orderer_availability)
-        )
+        products_with_restaurants.append((product, orderer_availability))
 
-    return render(request, template_name="products_list.html", context={
-        'products_with_restaurants': products_with_restaurants,
-        'restaurants': restaurants,
-    })
+    return render(
+        request,
+        template_name="products_list.html",
+        context={
+            'products_with_restaurants': products_with_restaurants,
+            'restaurants': restaurants,
+        },
+    )
 
 
 @user_passes_test(is_manager, login_url='restaurateur:login')
 def view_restaurants(request):
-    return render(request, template_name="restaurants_list.html", context={
-        'restaurants': Restaurant.objects.all(),
-    })
+    return render(
+        request,
+        template_name="restaurants_list.html",
+        context={
+            'restaurants': Restaurant.objects.all(),
+        },
+    )
 
 
 @user_passes_test(is_manager, login_url='restaurateur:login')
 def view_orders(request):
     orders = Order.objects.price().filter(status=1).prefetch_related('products')
 
-    restaurant_menu_items = RestaurantMenuItem.objects\
-        .filter(availability=True)\
-        .select_related('restaurant', 'product')
+    restaurant_menu_items = RestaurantMenuItem.objects.filter(
+        availability=True
+    ).select_related('restaurant', 'product')
 
     for order in orders:
         order.restaurants = set()
@@ -148,7 +166,8 @@ def view_orders(request):
 
         for order_item in order.products.all():
             product_restaurants = [
-                rest_item.restaurant for rest_item in restaurant_menu_items
+                rest_item.restaurant
+                for rest_item in restaurant_menu_items
                 if order_item.id == rest_item.product.id
             ]
 
@@ -159,9 +178,7 @@ def view_orders(request):
 
         customer_coords = get_place_coordinates(order.address)
         if not customer_coords:
-            order.restaurant_distances.append(
-                ('-', 'адрес не распознан')
-            )
+            order.restaurant_distances.append(('-', 'адрес не распознан'))
             continue
         for restaurant in order.restaurants:
             rest_coords = get_place_coordinates(restaurant.address)
@@ -169,8 +186,14 @@ def view_orders(request):
             order.restaurant_distances.append(
                 (restaurant.name, round(rest_distance, 2))
             )
-        order.restaurant_distances = sorted(order.restaurant_distances, key=lambda rest_dist: rest_dist[1])
+        order.restaurant_distances = sorted(
+            order.restaurant_distances, key=lambda rest_dist: rest_dist[1]
+        )
 
-    return render(request, template_name='order_items.html', context={
-        'order_items': orders,
-    })
+    return render(
+        request,
+        template_name='order_items.html',
+        context={
+            'order_items': orders,
+        },
+    )

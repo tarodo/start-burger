@@ -6,10 +6,7 @@ from phonenumber_field.modelfields import PhoneNumberField
 
 
 class Restaurant(models.Model):
-    name = models.CharField(
-        'название',
-        max_length=50
-    )
+    name = models.CharField('название', max_length=50)
     address = models.CharField(
         'адрес',
         max_length=100,
@@ -31,19 +28,14 @@ class Restaurant(models.Model):
 
 class ProductQuerySet(models.QuerySet):
     def available(self):
-        products = (
-            RestaurantMenuItem.objects
-                .filter(availability=True)
-                .values_list('product')
+        products = RestaurantMenuItem.objects.filter(availability=True).values_list(
+            'product'
         )
         return self.filter(pk__in=products)
 
 
 class ProductCategory(models.Model):
-    name = models.CharField(
-        'название',
-        max_length=50
-    )
+    name = models.CharField('название', max_length=50)
 
     class Meta:
         verbose_name = 'категория'
@@ -54,10 +46,7 @@ class ProductCategory(models.Model):
 
 
 class Product(models.Model):
-    name = models.CharField(
-        'название',
-        max_length=50
-    )
+    name = models.CharField('название', max_length=50)
     category = models.ForeignKey(
         ProductCategory,
         verbose_name='категория',
@@ -67,14 +56,9 @@ class Product(models.Model):
         on_delete=models.SET_NULL,
     )
     price = models.DecimalField(
-        'цена',
-        max_digits=8,
-        decimal_places=2,
-        validators=[MinValueValidator(0)]
+        'цена', max_digits=8, decimal_places=2, validators=[MinValueValidator(0)]
     )
-    image = models.ImageField(
-        'картинка'
-    )
+    image = models.ImageField('картинка')
     special_status = models.BooleanField(
         'спец.предложение',
         default=False,
@@ -109,18 +93,12 @@ class RestaurantMenuItem(models.Model):
         related_name='menu_items',
         verbose_name='продукт',
     )
-    availability = models.BooleanField(
-        'в продаже',
-        default=True,
-        db_index=True
-    )
+    availability = models.BooleanField('в продаже', default=True, db_index=True)
 
     class Meta:
         verbose_name = 'пункт меню ресторана'
         verbose_name_plural = 'пункты меню ресторана'
-        unique_together = [
-            ['restaurant', 'product']
-        ]
+        unique_together = [['restaurant', 'product']]
 
     def __str__(self):
         return f"{self.restaurant.name} - {self.product.name}"
@@ -128,28 +106,19 @@ class RestaurantMenuItem(models.Model):
 
 class PriceQuerySet(models.QuerySet):
     def price(self):
-        return self.annotate(full_price=Sum(F('orderproduct__price') * F('orderproduct__quantity')))
+        return self.annotate(
+            full_price=Sum(F('orderproduct__price') * F('orderproduct__quantity'))
+        )
 
 
 class Order(models.Model):
-    firstname = models.CharField(
-        'имя',
-        max_length=50,
-        db_index=True
-    )
-    lastname = models.CharField(
-        'фамилия',
-        max_length=50,
-        blank=True,
-        db_index=True
-    )
+    firstname = models.CharField('имя', max_length=50, db_index=True)
+    lastname = models.CharField('фамилия', max_length=50, blank=True, db_index=True)
     phonenumber = PhoneNumberField(verbose_name='номер владельца')
-    address = models.CharField(
-        'адрес',
-        max_length=1000,
-        db_index=True
+    address = models.CharField('адрес', max_length=1000, db_index=True)
+    products = models.ManyToManyField(
+        Product, related_name='orders', through='OrderProduct'
     )
-    products = models.ManyToManyField(Product, related_name='orders', through='OrderProduct')
     payment_method = models.SmallIntegerField(
         choices=[
             (1, 'Наличностью'),
@@ -157,7 +126,7 @@ class Order(models.Model):
         ],
         db_index=True,
         default=2,
-        verbose_name='метод оплаты'
+        verbose_name='метод оплаты',
     )
     comment = models.TextField(
         'комментарий',
@@ -170,11 +139,17 @@ class Order(models.Model):
         ],
         db_index=True,
         default=1,
-        verbose_name='статус'
+        verbose_name='статус',
     )
-    registered_at = models.DateTimeField(default=timezone.now, verbose_name="дата/время создания", db_index=True)
-    called_at = models.DateTimeField(verbose_name="дата/время звонка", db_index=True, null=True, blank=True)
-    delivered_at = models.DateTimeField(verbose_name="дата/время доставки", db_index=True, null=True, blank=True)
+    registered_at = models.DateTimeField(
+        default=timezone.now, verbose_name="дата/время создания", db_index=True
+    )
+    called_at = models.DateTimeField(
+        verbose_name="дата/время звонка", db_index=True, null=True, blank=True
+    )
+    delivered_at = models.DateTimeField(
+        verbose_name="дата/время доставки", db_index=True, null=True, blank=True
+    )
 
     restaurant = models.ForeignKey(
         Restaurant,
@@ -182,7 +157,7 @@ class Order(models.Model):
         on_delete=models.SET_NULL,
         verbose_name='ресторан',
         null=True,
-        blank=True
+        blank=True,
     )
 
     objects = PriceQuerySet.as_manager()
@@ -196,22 +171,13 @@ class Order(models.Model):
 
 
 class OrderProduct(models.Model):
-    order = models.ForeignKey(
-        Order,
-        on_delete=models.CASCADE,
-        verbose_name='заказ'
-    )
+    order = models.ForeignKey(Order, on_delete=models.CASCADE, verbose_name='заказ')
     product = models.ForeignKey(
-        Product,
-        on_delete=models.CASCADE,
-        verbose_name='продукт'
+        Product, on_delete=models.CASCADE, verbose_name='продукт'
     )
     quantity = models.IntegerField(verbose_name='количество')
     price = models.DecimalField(
-        'цена',
-        max_digits=8,
-        decimal_places=2,
-        validators=[MinValueValidator(0)]
+        'цена', max_digits=8, decimal_places=2, validators=[MinValueValidator(0)]
     )
 
     class Meta:

@@ -14,10 +14,7 @@ class Place(models.Model):
     lon = models.DecimalField(
         'долгота', decimal_places=2, max_digits=9, null=True, blank=True
     )
-    updated_at = models.DateTimeField(
-        'дата/время обновления',
-        default=timezone.now
-    )
+    updated_at = models.DateTimeField('дата/время обновления', default=timezone.now)
 
     class Meta:
         verbose_name = 'место'
