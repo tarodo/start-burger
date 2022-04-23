@@ -1,18 +1,16 @@
+import requests
 from django import forms
 from django.conf import settings
-from django.shortcuts import redirect, render
-from django.views import View
-from django.urls import reverse_lazy
-from django.contrib.auth.decorators import user_passes_test
-
 from django.contrib.auth import authenticate, login
 from django.contrib.auth import views as auth_views
-
-import requests
+from django.contrib.auth.decorators import user_passes_test
+from django.shortcuts import redirect, render
+from django.urls import reverse_lazy
+from django.views import View
 from geopy import distance
 
 from distance.models import Place
-from foodcartapp.models import Product, Restaurant, Order, RestaurantMenuItem
+from foodcartapp.models import Order, Product, Restaurant, RestaurantMenuItem
 
 
 class Login(forms.Form):
@@ -35,7 +33,7 @@ class Login(forms.Form):
 class LoginView(View):
     def get(self, request, *args, **kwargs):
         form = Login()
-        return render(request, "login.html", context={
+        return render(request, 'login.html', context={
             'form': form
         })
 
@@ -50,10 +48,10 @@ class LoginView(View):
             if user:
                 login(request, user)
                 if user.is_staff:  # FIXME replace with specific permission
-                    return redirect("restaurateur:RestaurantView")
-                return redirect("start_page")
+                    return redirect('restaurateur:RestaurantView')
+                return redirect('start_page')
 
-        return render(request, "login.html", context={
+        return render(request, 'login.html', context={
             'form': form,
             'ivalid': True,
         })

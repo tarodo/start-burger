@@ -1,11 +1,11 @@
+from django.db import transaction
 from django.http import JsonResponse
 from django.templatetags.static import static
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from rest_framework.serializers import ModelSerializer, ListField
-from django.db import transaction
+from rest_framework.serializers import ListField, ModelSerializer
 
-from .models import Product, Order, OrderProduct
+from .models import Order, OrderProduct, Product
 
 
 def banners_list_api(request):
@@ -82,10 +82,10 @@ def register_order(request):
 
     order_data = serializer.validated_data
     new_order = Order.objects.create(
-        firstname=order_data["firstname"],
-        lastname=order_data["lastname"],
-        phonenumber=order_data["phonenumber"],
-        address=order_data["address"]
+        firstname=order_data['firstname'],
+        lastname=order_data['lastname'],
+        phonenumber=order_data['phonenumber'],
+        address=order_data['address']
     )
     products_fields = serializer.validated_data['products']
     products = [OrderProduct(order=new_order, price=fields['product'].price, **fields) for fields in products_fields]
