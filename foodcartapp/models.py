@@ -149,7 +149,6 @@ class Order(models.Model):
             (2, "Электронно"),
         ],
         db_index=True,
-        default=1,
         verbose_name="метод оплаты",
     )
     comment = models.TextField(
