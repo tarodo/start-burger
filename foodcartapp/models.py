@@ -110,6 +110,30 @@ class PriceQuerySet(models.QuerySet):
             full_price=Sum(F("order_product__price") * F("order_product__quantity"))
         )
 
+    def fetch_restaurants(self):
+        orders = self.filter(status=1).prefetch_related('products')
+
+        restaurant_menu_items = RestaurantMenuItem.objects.filter(
+            availability=True
+        ).select_related('restaurant', 'product')
+
+        for order in orders:
+            order.restaurants = set()
+            order.restaurant_distances = []
+
+            for order_item in order.products.all():
+                product_restaurants = [
+                    rest_item.restaurant
+                    for rest_item in restaurant_menu_items
+                    if order_item.id == rest_item.product.id
+                ]
+
+                if not order.restaurants:
+                    order.restaurants = set(product_restaurants)
+
+                order.restaurants &= set(product_restaurants)
+        return orders
+
 
 class Order(models.Model):
     firstname = models.CharField("имя", max_length=50, db_index=True)
