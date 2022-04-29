@@ -1,7 +1,9 @@
+from django.conf import settings
 from django.contrib import admin
 from django.shortcuts import redirect, reverse
 from django.templatetags.static import static
 from django.utils.html import format_html
+from django.utils.http import url_has_allowed_host_and_scheme
 
 from .models import (
     Order,
@@ -132,6 +134,7 @@ class OrderAdmin(admin.ModelAdmin):
     def response_post_save_change(self, request, obj):
         res = super().response_post_save_change(request, obj)
         if "next" in request.GET:
-            return redirect(request.GET['next'])
+            if url_has_allowed_host_and_scheme(request.GET['next'], settings.ALLOWED_HOSTS):
+                return redirect(request.GET['next'])
         else:
             return res

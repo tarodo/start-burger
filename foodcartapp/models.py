@@ -107,7 +107,7 @@ class RestaurantMenuItem(models.Model):
 class PriceQuerySet(models.QuerySet):
     def price(self):
         return self.annotate(
-            full_price=Sum(F("orderproduct__price") * F("orderproduct__quantity"))
+            full_price=Sum(F("order_product__price") * F("order_product__quantity"))
         )
 
 
