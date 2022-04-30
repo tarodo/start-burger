@@ -198,13 +198,13 @@ class OrderProduct(models.Model):
         Order,
         on_delete=models.CASCADE,
         verbose_name="заказ",
-        related_name="order_product",
+        related_name="order_products",
     )
     product = models.ForeignKey(
         Product,
         on_delete=models.CASCADE,
         verbose_name="продукт",
-        related_name="order_product",
+        related_name="order_products",
     )
     quantity = models.PositiveIntegerField(
         verbose_name="количество", validators=[MinValueValidator(1)]
