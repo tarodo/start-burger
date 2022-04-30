@@ -154,7 +154,7 @@ def view_restaurants(request):
 
 @user_passes_test(is_manager, login_url='restaurateur:login')
 def view_orders(request):
-    orders = Order.objects.price().fetch_restaurants()
+    orders = Order.objects.with_prices().fetch_restaurants()
 
     for order in orders:
         customer_coords = get_place_coordinates(order.address)
