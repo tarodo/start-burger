@@ -149,6 +149,7 @@ Parcel будет следить за файлами в каталоге `bundle
 - `SECRET_KEY` — секретный ключ проекта. Он отвечает за шифрование на сайте. Например, им зашифрованы все пароли на вашем сайте. Не стоит использовать значение по-умолчанию, **замените на своё**.
 - `ALLOWED_HOSTS` — [см. документацию Django](https://docs.djangoproject.com/en/3.1/ref/settings/#allowed-hosts)
 - `ROLLBAR_ACCESS_TOKEN` — Токен от приложения из Rollbar.
+- `DATABASE_URL` - Настройки доступа к БД в виде URL [дока dj-database-url](https://github.com/jazzband/dj-database-url#url-schema)
 
 ## Цели проекта
 
