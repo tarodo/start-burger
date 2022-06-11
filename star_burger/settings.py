@@ -3,7 +3,7 @@ import os
 import dj_database_url
 
 from environs import Env
-
+import rollbar
 
 env = Env()
 env.read_env()
@@ -11,11 +11,18 @@ env.read_env()
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
-
 SECRET_KEY = env('SECRET_KEY')
 DEBUG = env.bool('DEBUG', True)
 
 ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', ['127.0.0.1', 'localhost'])
+
+ROLLBAR = {
+    'access_token': env.str('ROLLBAR_ACCESS_TOKEN'),
+    'environment': 'development' if DEBUG else 'production',
+    'root': BASE_DIR,
+}
+
+rollbar.init(**ROLLBAR)
 
 INSTALLED_APPS = [
     'foodcartapp.apps.FoodcartappConfig',
@@ -40,7 +47,9 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'debug_toolbar.middleware.DebugToolbarMiddleware',
+    'rollbar.contrib.django.middleware.RollbarNotifierMiddlewareExcluding404',
 ]
+
 
 ROOT_URLCONF = 'star_burger.urls'
 
@@ -118,7 +127,6 @@ STATIC_URL = '/static/'
 INTERNAL_IPS = [
     '127.0.0.1'
 ]
-
 
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, "assets"),

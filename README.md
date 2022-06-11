@@ -148,6 +148,7 @@ Parcel будет следить за файлами в каталоге `bundle
 - `YANDEX_GEOCODER_KEY` - токен, для работы с сервисом [геокодинга](https://dvmn.org/encyclopedia/api-docs/yandex-geocoder-api/)
 - `SECRET_KEY` — секретный ключ проекта. Он отвечает за шифрование на сайте. Например, им зашифрованы все пароли на вашем сайте. Не стоит использовать значение по-умолчанию, **замените на своё**.
 - `ALLOWED_HOSTS` — [см. документацию Django](https://docs.djangoproject.com/en/3.1/ref/settings/#allowed-hosts)
+- `ROLLBAR_ACCESS_TOKEN` — Токен от приложения из Rollbar.
 
 ## Цели проекта
 
