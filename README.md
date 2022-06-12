@@ -141,6 +141,11 @@ Parcel будет следить за файлами в каталоге `bundle
 ```sh
 ./node_modules/.bin/parcel build bundles-src/index.js --dist-dir bundles --public-url="./"
 ```
+## Как обновить проект на проде
+Использовать bash скрипт burger_deploy
+```sh
+./burger_deploy
+```
 
 Настроить бэкенд: создать файл `.env` в каталоге `star_burger/` со следующими настройками:
 
