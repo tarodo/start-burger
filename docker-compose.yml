@@ -1,5 +1,8 @@
 version: '3.8'
 
+volumes:
+  db_data:
+
 services:
   backend:
     build:
@@ -8,6 +11,17 @@ services:
     command: bash -c "python3 /usr/src/app/manage.py migrate --noinput && python manage.py runserver 0.0.0.0:8000"
     restart: always
     ports:
-      - "8000:8000"
+      - "8008:8000"
     env_file:
       - ./.env
+
+  db:
+    build:
+      context: ./db
+      dockerfile: Dockerfile
+    volumes:
+      - db_data:/var/lib/postgresql/data/
+    ports:
+      - "5433:5432"
+    env_file:
+      - ./db/.env
