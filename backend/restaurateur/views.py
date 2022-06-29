@@ -10,7 +10,7 @@ from django.views import View
 from geopy import distance
 
 from distance.models import Place
-from foodcartapp.models import Order, Product, Restaurant, RestaurantMenuItem
+from foodcartapp.models import Order, Product, Restaurant
 
 
 class Login(forms.Form):
@@ -35,7 +35,7 @@ class Login(forms.Form):
 class LoginView(View):
     def get(self, request, *args, **kwargs):
         form = Login()
-        return render(request, 'login.html', context={'form': form})
+        return render(request, 'templates/login.html', context={'form': form})
 
     def post(self, request):
         form = Login(request.POST)
@@ -53,7 +53,7 @@ class LoginView(View):
 
         return render(
             request,
-            'login.html',
+            'templates/login.html',
             context={
                 'form': form,
                 'ivalid': True,
@@ -133,7 +133,7 @@ def view_products(request):
 
     return render(
         request,
-        template_name="products_list.html",
+        template_name="templates/products_list.html",
         context={
             'products_with_restaurants': products_with_restaurants,
             'restaurants': restaurants,
@@ -145,7 +145,7 @@ def view_products(request):
 def view_restaurants(request):
     return render(
         request,
-        template_name="restaurants_list.html",
+        template_name="templates/restaurants_list.html",
         context={
             'restaurants': Restaurant.objects.all(),
         },
@@ -173,7 +173,7 @@ def view_orders(request):
 
     return render(
         request,
-        template_name='order_items.html',
+        template_name='templates/order_items.html',
         context={
             'order_items': orders,
         },
