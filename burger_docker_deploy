@@ -1,0 +1,10 @@
+#!/bin/bash
+
+cd /opt/start-burger-docker
+docker-compose down
+git pull
+
+docker build -t front frontend/
+docker run --rm -v $(pwd)/bundles:/opt/bundles front
+
+docker-compose up --build -d
