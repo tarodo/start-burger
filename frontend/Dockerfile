@@ -9,6 +9,4 @@ RUN npm ci --dev
 
 COPY /bundles-src /opt/frontend/bundles-src
 
-CMD ./node_modules/.bin/parcel build ./bundles-src/index.js --dist-dir bundles --public-url "./"
-
-EXPOSE 80
+CMD ./node_modules/.bin/parcel build ./bundles-src/index.js --dist-dir ../backend/bundles --public-url "./"

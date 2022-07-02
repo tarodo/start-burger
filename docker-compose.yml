@@ -4,21 +4,23 @@ volumes:
   db_data:
   static_volume:
   media_volume:
+  bundles:
 
 services:
   backend:
     build:
       context: ./backend
       dockerfile: Dockerfile
-    command: bash -c "python3 /usr/src/app/manage.py migrate --noinput && python manage.py collectstatic --noinput && python manage.py runserver 0.0.0.0:8000"
+    command: bash -c "python3 /usr/src/app/manage.py migrate --noinput && python3 /usr/src/app/manage.py collectstatic --noinput && gunicorn -b 0.0.0.0:8000 star_burger.wsgi:application"
     restart: always
     ports:
       - "8008:8000"
     env_file:
       - ./.env
     volumes:
-      - static_volume:/usr/src/app/staticfiles
-      - media_volume:/usr/src/app/media
+      - ./backend/staticfiles:/usr/src/app/staticfiles
+      - ./backend/media:/usr/src/app/media
+      - ./bundles:/usr/src/app/bundles
     depends_on:
       - db
 
@@ -28,17 +30,5 @@ services:
       dockerfile: Dockerfile
     volumes:
       - db_data:/var/lib/postgresql/data/
-    ports:
-      - "5433:5432"
     env_file:
       - ./db/.env
-
-  frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
-    command: ./node_modules/.bin/parcel watch ./bundles-src/index.js --dist-dir bundles --public-url "./"
-    volumes:
-      - static_volume:/opt/frontend/staticfiles
-    ports:
-      - "8003:80"
